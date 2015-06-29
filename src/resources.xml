@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/hafshin/kamus">
+    <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
+    <file compressed="true">dicts/en-id.dict</file>
+    <file compressed="true">dicts/id-en.dict</file>
+  </gresource>
+</gresources>

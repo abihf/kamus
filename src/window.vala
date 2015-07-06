@@ -1,3 +1,20 @@
+/**
+ * This file is part of Kamus
+ * Copyright (C) 2015 Abi Hafshin
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 namespace Kamus {
   
@@ -5,34 +22,36 @@ namespace Kamus {
   public class Window : Gtk.ApplicationWindow {
     
     /**
-     *  Selected dictionary 
+     *  Current dictionary 
      */
     Dictionary dict;
     
-    
+    /**
+     * Ready status. 
+     */
     private bool ready = false;
     
+
     private bool search_error = false;
     
     [GtkChild]
-    private Gtk.ListStore word_list;
-
+    private Gtk.SearchEntry search_entry;
+    
+    [GtkChild]
+    private Gtk.TreeView listview;
+        
+    [GtkChild]
+    private Gtk.TreeSelection list_selection;
+    
     [GtkChild]
     private Gtk.TextBuffer definition_buffer;
 
     [GtkChild]
-    private Gtk.SearchEntry search_entry;
-
-    [GtkChild]
-    private Gtk.TreeView listview;
-    
-    [GtkChild]
     private Gtk.Spinner spinner;
-    //[GtkChild]
-    //
-    [GtkChild]
-    private Gtk.TreeSelection list_selection;
     
+    /**
+     * constructor
+     */
     public Window(Gtk.Application app) {
       Object(application: app, title: "Kamus");
       
@@ -41,7 +60,7 @@ namespace Kamus {
       this.add_action (about_action);
     }
     
-    
+    // called when window shown
     [GtkCallback]
     public void on_show() {
       load_dictionary("en-id");
@@ -49,46 +68,38 @@ namespace Kamus {
     }
     
     private void load_dictionary(string dict_id) {
-      load_dictionary_inner.begin(dict_id, (obj, res) => {
-        load_dictionary_inner.end(res);
+      ready = false;
+      definition_buffer.set_text("Loading dictioanry");
+      spinner.start();
+
+      dict = null;
+      DictionaryCollection.get_by_name.begin(dict_id, (obj, res) => {
+        dict = DictionaryCollection.get_by_name.end(res);
+        Idle.add(update_word_list);
       });
     }
 
-    private async void load_dictionary_inner(string name) {
-      //SourceFunc callback = load_dictionary_inner.callback;
-      this.ready = false;
-      definition_buffer.set_text("Loading dictioanry");
-      spinner.start();
+    private bool update_word_list() {
+      Gtk.TreeIter iter;
+      list_selection.unselect_all();
+      // word_list.clear();
+      var listmodel = new Gtk.ListStore(2, typeof(string), typeof(int));
+      for (int i=0; i< dict.items.length; i++) {
+        listmodel.append(out iter);
+        listmodel.set(iter, 0, dict.items[i].word, 1, i);
+
+      }
+      listview.model = listmodel;
       
-      dict = null;
-      dict = yield DictionaryCollection.get_by_name(name);
-
-      // ThreadFunc<void*> run = () => {
-      SourceFunc run = () => {
-        Gtk.TreeIter iter;
-        list_selection.unselect_all();
-        word_list.clear();
-
-        for (int i=0; i< dict.items.length; i++) {
-          word_list.append(out iter);
-          word_list.set(iter, 0, dict.items[i].word, 1, i);
-
-        }
-        // Idle.add((owned) callback);
-        
-        this.ready = true;
-        var path = new Gtk.TreePath.from_indices(0);
-        list_selection.select_path(path);
-        spinner.stop();
-        return false;
-      };
-      Idle.add(run);
-      //Thread.create<void*>(run, false);
-      //run();
+      this.ready = true;
+      var path = new Gtk.TreePath.from_indices(0);
+      list_selection.select_path(path);
+      spinner.stop();
+      return false;
     }
     
     [GtkCallback]
-    public void on_word_selected(Gtk.TreeSelection selection) {
+    private void on_word_selected(Gtk.TreeSelection selection) {
       Gtk.TreeModel model;
 		  Gtk.TreeIter iter;
 		  uint64 index;

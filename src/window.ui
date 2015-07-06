@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.19.0 -->
 <interface>
-  <requires lib="gtk+" version="3.16"/>
+  <requires lib="gtk+" version="3.12"/>
   <object class="GtkTextBuffer" id="definition_buffer"/>
-  <object class="GtkEntryCompletion" id="entrycompletion1"/>
   <object class="GtkMenu" id="option-menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkRadioMenuItem" id="dict_en_to_id">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="label" translatable="yes">EN to ID</property>
-        <property name="use_underline">True</property>
         <property name="active">True</property>
         <property name="draw_as_radio">True</property>
         <property name="group">dict_id_to_en</property>
-        <signal name="toggled" handler="on_dictionary_chooser_changed" swapped="no"/>
+        <signal name="toggled" handler="on_dictionary_chooser_changed"/>
       </object>
     </child>
     <child>
@@ -26,17 +23,9 @@
         <property name="label" translatable="yes">ID to EN</property>
         <property name="draw_as_radio">True</property>
         <property name="group">dict_en_to_id</property>
-        <signal name="toggled" handler="on_dictionary_chooser_changed" swapped="no"/>
+        <signal name="toggled" handler="on_dictionary_chooser_changed"/>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="word_list">
-    <columns>
-      <!-- column-name word -->
-      <column type="gchararray"/>
-      <!-- column-name offset -->
-      <column type="guint64"/>
-    </columns>
   </object>
   <template class="KamusWindow" parent="GtkApplicationWindow">
     <property name="can_focus">True</property>
@@ -60,7 +49,6 @@
               <object class="GtkTreeView" id="listview">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">word_list</property>
                 <property name="headers_visible">False</property>
                 <property name="headers_clickable">False</property>
                 <child internal-child="selection">
@@ -152,7 +140,6 @@
             <property name="primary_icon_name">edit-find-symbolic</property>
             <property name="primary_icon_sensitive">False</property>
             <property name="placeholder_text" translatable="yes">Cari Kata</property>
-            <property name="completion">entrycompletion1</property>
             <property name="input_purpose">alpha</property>
             <signal name="search-changed" handler="on_search_changed" swapped="no"/>
           </object>

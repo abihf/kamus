@@ -87,7 +87,6 @@ namespace Kamus {
       for (int i=0; i< dict.items.length; i++) {
         listmodel.append(out iter);
         listmodel.set(iter, 0, dict.items[i].word, 1, i);
-
       }
       listview.model = listmodel;
       
@@ -127,15 +126,7 @@ namespace Kamus {
         search_set_error(false);
         return;
       };
-      int index = binary_search(entry.text, 0, dict.items.length, true);
-      debug("full bin search: %d\n", index);
-      if (index < 0) {
-        index = binary_search(entry.text, 0, dict.items.length, false);
-        debug("prefixed bin search: %d\n", index);
-        if (index > 0) {
-          while(str_prefix_cmp(dict.items[index-1].word, entry.text) >= 0) index--;
-        }
-      }
+      int index = dict.search(entry.text);
       if (index >= 0) {
         search_set_error(false);
         var path = new Gtk.TreePath.from_indices(index);
@@ -154,46 +145,21 @@ namespace Kamus {
         search_entry.get_style_context().remove_class("error");
       search_error = error;
     }
-
-    private int binary_search(string search, int begin, int end, bool full) {
-      if (begin > end) return -1;
-      int mid = (begin + end) >> 1;
-      string word = dict.items[mid].word;
-      int cmp = str_prefix_cmp(word, search, full);
-      if (cmp == 0) return mid;
-      else if (cmp > 0) return binary_search(search, begin, mid-1, full);
-      else return binary_search(search, mid+1, end, full);
-    }
-
-    private int str_prefix_cmp(string str1, string str2, bool full = false) {
-      int len = str2.length;
-      if (str1.length < len) len = str1.length;
-
-      for(int i=0; i<len; i++) {
-        int cmp = str1[i] - str2[i];
-        if (cmp != 0) return cmp;
-      }
-      if (full) return str1.length - str2.length;
-      else if(str1.length >= str2.length) {
-        return 0;
-      } else {
-        return -1;
-      }
-    }
 	  
     private void on_about_activate() {
 	    string[] authors = { "Abi Hafshin <abi@hafs.in>", null };
 
 		  Gtk.show_about_dialog (this, 
-                                 "program-name", Config.PACKAGE_NAME,
-                                 "version", Config.VERSION,
-                                 "copyright", ("Copyright \xc2\xa9 2015 Abi Hafshin"),
-                                 "authors", authors,
-                                 "website", Config.PACKAGE_URL,
-                                 "website-label", ("Homepage"),
-                                 "license-type", Gtk.License.GPL_3_0,
-                                 "logo-icon-name", "accessories-dictionary",
-                                 null);
+         "program-name", Config.PACKAGE_NAME,
+         "version", Config.VERSION,
+         "copyright", ("Copyright \xc2\xa9 2015 Abi Hafshin"),
+         "authors", authors,
+         "website", Config.PACKAGE_URL,
+         "website-label", ("GitHub"),
+         "license-type", Gtk.License.GPL_3_0,
+         "logo-icon-name", "accessories-dictionary",
+         null
+      );
 	  }
 	  
   }
